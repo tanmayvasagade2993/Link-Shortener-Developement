@@ -1,0 +1,55 @@
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${EUREKA_SERVER1}:8761/eureka/,http://${EUREKA_SERVER2}:8762/eureka/
+server:
+  port: 9999
+spring:
+  application:
+    name: url-gateway-service
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  cloud:
+    gateway:
+      routes:
+        - id: url-link-api-service
+          uri: lb://url-link-service
+          order: 1
+          predicates:
+            - Path=/*
+        - id: url-link-service
+          uri: lb://url-link-service
+          order: 2
+          predicates:
+            - Path=/link-server/**
+          filters:
+            - StripPrefix=1
+        - id: url-data-service
+          uri: lb://url-data-service
+          order: 3
+          predicates:
+            - Path=/data-server/**
+          filters:
+            - StripPrefix=1
+        - id: url-account-service
+          uri: lb://url-account-service
+          order: 4
+          predicates:
+            - Path=/account-server/**
+          filters:
+            - StripPrefix=1
+        - id: url-shop-service
+          uri: lb://url-shop-service
+          order: 5
+          predicates:
+            - Path=/shop-server/**
+          filters:
+            - StripPrefix=1
+logging:
+  level:
+    root: info
